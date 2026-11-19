@@ -55,3 +55,52 @@ world_gii %>%
 
 qtm(world_gii, fill = "gii_diff")
 ```
+
+```{r}
+summary(world_gii$gii_diff)
+
+gii_clean %>%
+  filter(
+    nchar(iso3) == 3,
+    !is.na(gii_2010),
+    !is.na(gii_2019)
+  ) %>%
+  anti_join(st_drop_geometry(world_iso3), by = "iso3")
+```
+
+```{r}
+tmap_mode("plot")
+
+gii_map <- tm_shape(world_gii) +
+  tm_polygons(
+    fill = "gii_diff",
+    col = "grey50",
+    lwd = 0.3,
+    fill.scale = tm_scale_intervals(
+      values = c("#762A83", "#AF8DC3", "#E7D4E8",
+           "#D9F0D3", "#7FBF7B", "#1B7837"),
+      breaks = c(-0.6, -0.1, -0.05, 0, 0.05, 0.1, 0.6)
+    ),
+    fill.legend = tm_legend(title = "GII change\n2019 minus 2010")
+  ) +
+  tm_title("Change in gender inequality, 2010–2019") +
+  tm_credits(
+  "Data: UNDP HDR25; boundaries: Esri",
+  size = 0.6,
+  position = tm_pos_out("center", "bottom")
+)
+
+gii_map
+
+png(
+  filename = here("gii_change_map.png"),
+  width = 10,
+  height = 6,
+  units = "in",
+  res = 300,
+  type = "quartz"
+)
+
+print(gii_map)
+dev.off()
+```
